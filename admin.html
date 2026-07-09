@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin · LOBO'S COSMETIC</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://upload-widget.cloudinary.com/latest/global/all.js"></script>
+<style>
+:root{
+  --black:#0d0d0d;--pink:#ff2f6e;--pink-deep:#c8185a;--pink-soft:#ffe3ec;
+  --white:#fff;--gray:#6f6f6f;--gray-light:#f6f6f6;--border:#e8e8e8;
+  --ok:#1c8f4a;--ok-bg:#e8f8ee;--warn:#c9770e;--warn-bg:#fff2e0;--danger:#c92e2e;--danger-bg:#fdeaea;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Poppins',sans-serif;background:var(--gray-light);color:var(--black)}
+button{font-family:inherit;cursor:pointer;border:none}
+input,select,textarea{font-family:inherit}
+
+/* ===== LOGIN ===== */
+#loginScreen{
+  min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--black);
+}
+.login-box{background:#fff;padding:48px 40px;border-radius:10px;width:100%;max-width:360px;text-align:center}
+.login-box .logo{font-family:'Bebas Neue';font-size:30px;letter-spacing:3px;margin-bottom:6px}
+.login-box .logo span{color:var(--pink)}
+.login-box p{color:var(--gray);font-size:13px;margin-bottom:26px}
+.login-box input{
+  width:100%;padding:14px;border:1.5px solid var(--border);border-radius:6px;font-size:14px;margin-bottom:14px;
+}
+.login-box button{
+  width:100%;background:var(--black);color:#fff;padding:14px;border-radius:6px;font-weight:600;
+  letter-spacing:1px;text-transform:uppercase;font-size:13px;transition:.2s;
+}
+.login-box button:hover{background:var(--pink)}
+.login-error{color:var(--danger);font-size:12px;margin-top:10px;display:none}
+
+/* ===== LAYOUT ===== */
+#appScreen{display:none}
+.topbar{
+  background:var(--black);color:#fff;padding:16px 28px;display:flex;justify-content:space-between;align-items:center;
+  position:sticky;top:0;z-index:100;
+}
+.topbar .logo{font-family:'Bebas Neue';font-size:22px;letter-spacing:2px}
+.topbar .logo span{color:var(--pink)}
+.logout-btn{background:none;color:#ccc;font-size:12px;text-decoration:underline}
+
+.tabs{display:flex;gap:4px;background:#fff;padding:0 28px;border-bottom:1px solid var(--border);overflow-x:auto}
+.tab{
+  padding:16px 18px;font-size:13px;font-weight:600;color:var(--gray);white-space:nowrap;
+  border-bottom:3px solid transparent;transition:.2s;
+}
+.tab.active{color:var(--black);border-color:var(--pink)}
+
+.container{max-width:1200px;margin:0 auto;padding:28px}
+.view{display:none}
+.view.active{display:block}
+
+/* ===== DASHBOARD ===== */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:30px}
+.kpi-card{background:#fff;border-radius:10px;padding:22px;border:1px solid var(--border)}
+.kpi-card .label{font-size:11px;color:var(--gray);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:8px}
+.kpi-card .value{font-size:28px;font-weight:700}
+.kpi-card.alert .value{color:var(--warn)}
+
+.alert-box{background:var(--warn-bg);border:1px solid #ffdca0;border-radius:10px;padding:18px 22px;margin-bottom:24px}
+.alert-box h4{color:var(--warn);font-size:13px;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
+.alert-item{display:flex;justify-content:space-between;padding:8px 0;font-size:13px;border-bottom:1px solid #ffe6ba}
+.alert-item:last-child{border:none}
+
+/* ===== TABLA ===== */
+.panel{background:#fff;border-radius:10px;border:1px solid var(--border);overflow:hidden}
+.panel-head{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.panel-head h3{font-size:16px;font-weight:700}
+.btn{
+  padding:10px 20px;border-radius:6px;font-size:13px;font-weight:600;letter-spacing:.5px;transition:.2s;
+}
+.btn-primary{background:var(--black);color:#fff}
+.btn-primary:hover{background:var(--pink)}
+.btn-outline{background:#fff;border:1.5px solid var(--border);color:var(--black)}
+.btn-outline:hover{border-color:var(--black)}
+.btn-sm{padding:6px 12px;font-size:11px}
+
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray);padding:12px 20px;background:var(--gray-light);white-space:nowrap}
+td{padding:14px 20px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border:none}
+.prod-thumb{width:44px;height:44px;border-radius:6px;object-fit:cover;background:var(--gray-light)}
+.prod-name-cell{display:flex;align-items:center;gap:12px}
+.tag{padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase}
+.tag-ok{background:var(--ok-bg);color:var(--ok)}
+.tag-warn{background:var(--warn-bg);color:var(--warn)}
+.tag-danger{background:var(--danger-bg);color:var(--danger)}
+.actions-cell{display:flex;gap:6px}
+.icon-action{width:30px;height:30px;border-radius:6px;background:var(--gray-light);display:flex;align-items:center;justify-content:center;font-size:13px}
+.icon-action:hover{background:var(--pink-soft)}
+
+.empty-state{text-align:center;padding:50px 20px;color:var(--gray);font-size:13px}
+
+/* ===== MODAL ===== */
+.modal-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:2000;
+  align-items:center;justify-content:center;padding:20px;overflow-y:auto;
+}
+.modal-overlay.open{display:flex}
+.modal-box{background:#fff;border-radius:10px;max-width:560px;width:100%;max-height:90vh;overflow-y:auto}
+.modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff}
+.modal-header h3{font-size:16px;font-weight:700}
+.modal-close-btn{background:var(--gray-light);width:30px;height:30px;border-radius:50%;font-size:15px}
+.modal-body{padding:24px}
+.form-row{margin-bottom:16px}
+.form-row label{display:block;font-size:12px;font-weight:600;margin-bottom:6px;color:var(--gray)}
+.form-row input,.form-row select,.form-row textarea{
+  width:100%;padding:11px 12px;border:1.5px solid var(--border);border-radius:6px;font-size:13px;
+}
+.form-row textarea{resize:vertical;min-height:80px}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.upload-zone{
+  border:2px dashed var(--border);border-radius:8px;padding:20px;text-align:center;cursor:pointer;transition:.2s;
+}
+.upload-zone:hover{border-color:var(--pink)}
+.upload-preview{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.upload-preview img{width:70px;height:70px;object-fit:cover;border-radius:6px;border:1px solid var(--border)}
+.modal-footer{padding:18px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;position:sticky;bottom:0;background:#fff}
+
+.stock-inline{display:flex;align-items:center;gap:10px}
+.stock-num{font-weight:700;font-size:15px}
+
+@media(max-width:700px){
+  .form-grid-2{grid-template-columns:1fr}
+  table{font-size:12px}
+  th,td{padding:10px 12px}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="logo">LOBO'S <span>COSMETIC</span></div>
+    <p>Panel de administración</p>
+    <input type="password" id="adminPassword" placeholder="Contraseña" onkeypress="if(event.key==='Enter')doLogin()">
+    <button onclick="doLogin()">Ingresar</button>
+    <div class="login-error" id="loginError">Contraseña incorrecta</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="appScreen">
+  <div class="topbar">
+    <div class="logo">LOBO'S <span>COSMETIC</span> · Admin</div>
+    <button class="logout-btn" onclick="doLogout()">Cerrar sesión</button>
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" data-view="dashboard" onclick="switchView('dashboard')">Dashboard</div>
+    <div class="tab" data-view="productos" onclick="switchView('productos')">Productos</div>
+    <div class="tab" data-view="inventario" onclick="switchView('inventario')">Inventario</div>
+    <div class="tab" data-view="movimientos" onclick="switchView('movimientos')">Movimientos</div>
+  </div>
+
+  <div class="container">
+
+    <!-- DASHBOARD -->
+    <div class="view active" id="view-dashboard">
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="label">Productos activos</div><div class="value" id="kpiTotalProd">0</div></div>
+        <div class="kpi-card"><div class="label">Unidades en stock</div><div class="value" id="kpiTotalStock">0</div></div>
+        <div class="kpi-card alert"><div class="label">Stock bajo</div><div class="value" id="kpiBajoStock">0</div></div>
+        <div class="kpi-card"><div class="label">Agotados</div><div class="value" id="kpiAgotados">0</div></div>
+      </div>
+
+      <div class="alert-box" id="alertBox" style="display:none">
+        <h4>⚠ Productos con stock bajo</h4>
+        <div id="alertList"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h3>Últimos productos agregados</h3></div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Producto</th><th>Categoría</th><th>Precio</th><th>Stock</th></tr></thead>
+            <tbody id="recentProdBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRODUCTOS -->
+    <div class="view" id="view-productos">
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Productos</h3>
+          <button class="btn btn-primary" onclick="openProductModal()">+ Nuevo producto</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Producto</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="productsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- INVENTARIO -->
+    <div class="view" id="view-inventario">
+      <div class="panel">
+        <div class="panel-head"><h3>Control de inventario</h3></div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Producto</th><th>Stock actual</th><th>Stock mínimo</th><th>Estado</th><th>Acciones</th></tr></thead>
+            <tbody id="inventoryBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- MOVIMIENTOS -->
+    <div class="view" id="view-movimientos">
+      <div class="panel">
+        <div class="panel-head"><h3>Historial de movimientos</h3></div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr><th>Fecha</th><th>Producto</th><th>Tipo</th><th>Cantidad</th><th>Motivo</th><th>Stock resultante</th></tr></thead>
+            <tbody id="movementsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL PRODUCTO -->
+<div class="modal-overlay" id="productModalOverlay">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3 id="productModalTitle">Nuevo producto</h3>
+      <button class="modal-close-btn" onclick="closeProductModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="prodId">
+      <div class="form-row">
+        <label>Nombre del producto</label>
+        <input type="text" id="prodNombre" placeholder="Ej: Labial Matte Rosa Nude">
+      </div>
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>Categoría</label>
+          <select id="prodCategoria">
+            <option value="rostro">Rostro</option>
+            <option value="ojos">Ojos</option>
+            <option value="cejas">Cejas</option>
+            <option value="skincare">Skincare</option>
+            <option value="cuidado_capilar">Cuidado Capilar</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Marca</label>
+          <input type="text" id="prodMarca" placeholder="Opcional">
+        </div>
+      </div>
+      <div class="form-grid-2">
+        <div class="form-row">
+          <label>Precio</label>
+          <input type="number" id="prodPrecio" placeholder="0">
+        </div>
+        <div class="form-row">
+          <label>Precio anterior (opcional)</label>
+          <input type="number" id="prodPrecioAnterior" placeholder="0">
+        </div>
+      </div>
+      <div class="form-row">
+        <label>Descripción</label>
+        <textarea id="prodDescripcion" placeholder="Describe el producto..."></textarea>
+      </div>
+      <div class="form-row">
+        <label>Foto principal</label>
+        <div class="upload-zone" onclick="openCloudinaryWidget()">
+          <div style="font-size:24px;margin-bottom:6px">☁️</div>
+          <div style="font-size:13px;font-weight:600">Subir imagen desde Cloudinary</div>
+          <div style="font-size:11px;color:var(--gray);margin-top:4px">Clic para elegir desde galería, cámara o archivo</div>
+        </div>
+        <input type="hidden" id="prodImagenPrincipal">
+        <div class="upload-preview" id="uploadPreview"></div>
+      </div>
+      <div class="form-row" id="stockInicialRow">
+        <label>Stock inicial</label>
+        <input type="number" id="prodStockInicial" placeholder="0" value="0">
+      </div>
+      <div class="form-row">
+        <label>Stock mínimo (alerta)</label>
+        <input type="number" id="prodStockMinimo" placeholder="5" value="5">
+      </div>
+      <div class="form-row" style="display:flex;align-items:center;gap:8px">
+        <input type="checkbox" id="prodDestacado" style="width:auto">
+        <label style="margin:0" for="prodDestacado">Producto destacado</label>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeProductModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveProduct()">Guardar producto</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REABASTECER -->
+<div class="modal-overlay" id="restockModalOverlay">
+  <div class="modal-box" style="max-width:400px">
+    <div class="modal-header">
+      <h3>Reabastecer stock</h3>
+      <button class="modal-close-btn" onclick="closeRestockModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="restockProductId">
+      <p style="font-size:13px;color:var(--gray);margin-bottom:16px" id="restockProductName"></p>
+      <div class="form-row">
+        <label>Cantidad a agregar</label>
+        <input type="number" id="restockCantidad" placeholder="0">
+      </div>
+      <div class="form-row">
+        <label>Motivo</label>
+        <input type="text" id="restockMotivo" placeholder="Ej: Compra a proveedor" value="Reabastecimiento">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeRestockModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmRestock()">Confirmar entrada</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AJUSTE MANUAL -->
+<div class="modal-overlay" id="adjustModalOverlay">
+  <div class="modal-box" style="max-width:400px">
+    <div class="modal-header">
+      <h3>Ajustar stock mínimo</h3>
+      <button class="modal-close-btn" onclick="closeAdjustModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="adjustProductId">
+      <p style="font-size:13px;color:var(--gray);margin-bottom:16px" id="adjustProductName"></p>
+      <div class="form-row">
+        <label>Nuevo stock mínimo</label>
+        <input type="number" id="adjustStockMinimo" placeholder="5">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeAdjustModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="confirmAdjust()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================= CONFIG ================= */
+const SUPABASE_URL = "https://pshgxyibdxoyttrkpmzr.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzaGd4eWliZHhveXR0cmtwbXpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NDY5MzUsImV4cCI6MjA5OTEyMjkzNX0.z2xysCO345ykSwXQMeIlb0IcOrohmjZqnhraiGSg_C8";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const CLOUDINARY_CLOUD = "bpu8bokz";
+const CLOUDINARY_PRESET = "lobos_cosmetic";
+
+const ADMIN_PASSWORD = "Lobos2026"; // <-- CAMBIA ESTA CONTRASEÑA
+const MAX_ATTEMPTS = 5;
+let loginAttempts = 0;
+
+const CATEGORIAS = {
+  rostro:'Rostro', ojos:'Ojos', cejas:'Cejas', skincare:'Skincare', cuidado_capilar:'Cuidado Capilar'
+};
+
+let productos = [];
+let inventario = [];
+let movimientos = [];
+let uploadedImageUrl = '';
+
+/* ================= LOGIN ================= */
+function doLogin(){
+  const pass = document.getElementById('adminPassword').value;
+  if(pass === ADMIN_PASSWORD){
+    sessionStorage.setItem('lobos_admin_auth', 'true');
+    showApp();
+  } else {
+    loginAttempts++;
+    document.getElementById('loginError').style.display = 'block';
+    if(loginAttempts >= MAX_ATTEMPTS){
+      document.getElementById('adminPassword').disabled = true;
+      document.getElementById('loginError').textContent = 'Demasiados intentos. Recarga la página.';
+    }
+  }
+}
+function doLogout(){
+  sessionStorage.removeItem('lobos_admin_auth');
+  location.reload();
+}
+function showApp(){
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appScreen').style.display = 'block';
+  loadAllData();
+}
+document.addEventListener('DOMContentLoaded', () => {
+  if(sessionStorage.getItem('lobos_admin_auth') === 'true'){
+    showApp();
+  }
+});
+
+/* ================= TABS ================= */
+function switchView(view){
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.view === view));
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('active', v.id === 'view-'+view));
+}
+
+/* ================= DATA LOADING ================= */
+async function loadAllData(){
+  await Promise.all([loadProducts(), loadInventory(), loadMovements()]);
+  renderDashboard();
+  renderProductsTable();
+  renderInventoryTable();
+  renderMovementsTable();
+}
+
+async function loadProducts(){
+  const { data, error } = await sb.from('lobos_productos').select('*').order('creado_en', {ascending:false});
+  if(error) console.error(error);
+  productos = data || [];
+}
+async function loadInventory(){
+  const { data, error } = await sb.from('lobos_inventario').select('*');
+  if(error) console.error(error);
+  inventario = data || [];
+}
+async function loadMovements(){
+  const { data, error } = await sb.from('lobos_movimientos').select('*').order('creado_en', {ascending:false}).limit(100);
+  if(error) console.error(error);
+  movimientos = data || [];
+}
+
+function getInv(prodId){
+  return inventario.find(i => i.producto_id === prodId);
+}
+
+/* ================= DASHBOARD ================= */
+function renderDashboard(){
+  const activos = productos.filter(p => p.activo);
+  document.getElementById('kpiTotalProd').textContent = activos.length;
+
+  const totalStock = inventario.reduce((s,i) => s + i.stock_actual, 0);
+  document.getElementById('kpiTotalStock').textContent = totalStock;
+
+  const bajoStock = inventario.filter(i => i.stock_actual > 0 && i.stock_actual <= i.stock_minimo);
+  document.getElementById('kpiBajoStock').textContent = bajoStock.length;
+
+  const agotados = inventario.filter(i => i.stock_actual <= 0);
+  document.getElementById('kpiAgotados').textContent = agotados.length;
+
+  const alertBox = document.getElementById('alertBox');
+  const alertList = document.getElementById('alertList');
+  if(bajoStock.length > 0){
+    alertBox.style.display = 'block';
+    alertList.innerHTML = bajoStock.map(i => {
+      const p = productos.find(p => p.id === i.producto_id);
+      return `<div class="alert-item"><span>${p ? p.nombre : '—'}</span><span><b>${i.stock_actual}</b> / mín. ${i.stock_minimo}</span></div>`;
+    }).join('');
+  } else {
+    alertBox.style.display = 'none';
+  }
+
+  const recent = productos.slice(0,5);
+  document.getElementById('recentProdBody').innerHTML = recent.map(p => {
+    const inv = getInv(p.id);
+    return `<tr>
+      <td class="prod-name-cell"><img class="prod-thumb" src="${p.imagen_principal||'https://placehold.co/60/f6f6f6/999?text=LC'}">${p.nombre}</td>
+      <td>${CATEGORIAS[p.categoria]||p.categoria}</td>
+      <td>$${Number(p.precio).toLocaleString('es-CO')}</td>
+      <td>${inv ? inv.stock_actual : 0}</td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="4" class="empty-state">Aún no hay productos</td></tr>`;
+}
+
+/* ================= PRODUCTOS TABLA ================= */
+function renderProductsTable(){
+  const body = document.getElementById('productsBody');
+  if(productos.length === 0){
+    body.innerHTML = `<tr><td colspan="6" class="empty-state">No hay productos. Crea el primero con "+ Nuevo producto".</td></tr>`;
+    return;
+  }
+  body.innerHTML = productos.map(p => {
+    const inv = getInv(p.id);
+    const stock = inv ? inv.stock_actual : 0;
+    let tag = `<span class="tag tag-ok">Activo</span>`;
+    if(!p.activo) tag = `<span class="tag tag-danger">Inactivo</span>`;
+    return `<tr>
+      <td class="prod-name-cell"><img class="prod-thumb" src="${p.imagen_principal||'https://placehold.co/60/f6f6f6/999?text=LC'}">${p.nombre}</td>
+      <td>${CATEGORIAS[p.categoria]||p.categoria}</td>
+      <td>$${Number(p.precio).toLocaleString('es-CO')}</td>
+      <td>${stock}</td>
+      <td>${tag}</td>
+      <td class="actions-cell">
+        <div class="icon-action" onclick="editProduct('${p.id}')" title="Editar">✏️</div>
+        <div class="icon-action" onclick="toggleActive('${p.id}', ${p.activo})" title="${p.activo?'Desactivar':'Activar'}">${p.activo?'🚫':'✅'}</div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+async function toggleActive(id, current){
+  await sb.from('lobos_productos').update({activo: !current}).eq('id', id);
+  await loadProducts();
+  renderProductsTable();
+  renderDashboard();
+}
+
+/* ================= MODAL PRODUCTO ================= */
+function openProductModal(){
+  document.getElementById('productModalTitle').textContent = 'Nuevo producto';
+  document.getElementById('prodId').value = '';
+  document.getElementById('prodNombre').value = '';
+  document.getElementById('prodCategoria').value = 'rostro';
+  document.getElementById('prodMarca').value = '';
+  document.getElementById('prodPrecio').value = '';
+  document.getElementById('prodPrecioAnterior').value = '';
+  document.getElementById('prodDescripcion').value = '';
+  document.getElementById('prodImagenPrincipal').value = '';
+  document.getElementById('uploadPreview').innerHTML = '';
+  document.getElementById('prodStockInicial').value = 0;
+  document.getElementById('prodStockMinimo').value = 5;
+  document.getElementById('prodDestacado').checked = false;
+  document.getElementById('stockInicialRow').style.display = 'block';
+  uploadedImageUrl = '';
+  document.getElementById('productModalOverlay').classList.add('open');
+}
+
+function editProduct(id){
+  const p = productos.find(p => p.id === id);
+  if(!p) return;
+  const inv = getInv(id);
+  document.getElementById('productModalTitle').textContent = 'Editar producto';
+  document.getElementById('prodId').value = p.id;
+  document.getElementById('prodNombre').value = p.nombre;
+  document.getElementById('prodCategoria').value = p.categoria;
+  document.getElementById('prodMarca').value = p.marca || '';
+  document.getElementById('prodPrecio').value = p.precio;
+  document.getElementById('prodPrecioAnterior').value = p.precio_anterior || '';
+  document.getElementById('prodDescripcion').value = p.descripcion || '';
+  document.getElementById('prodImagenPrincipal').value = p.imagen_principal || '';
+  uploadedImageUrl = p.imagen_principal || '';
+  document.getElementById('uploadPreview').innerHTML = p.imagen_principal ? `<img src="${p.imagen_principal}">` : '';
+  document.getElementById('prodStockMinimo').value = inv ? inv.stock_minimo : 5;
+  document.getElementById('prodDestacado').checked = p.destacado;
+  document.getElementById('stockInicialRow').style.display = 'none'; // el stock se maneja en la pestaña Inventario al editar
+  document.getElementById('productModalOverlay').classList.add('open');
+}
+
+function closeProductModal(){
+  document.getElementById('productModalOverlay').classList.remove('open');
+}
+
+function openCloudinaryWidget(){
+  const widget = cloudinary.createUploadWidget({
+    cloudName: CLOUDINARY_CLOUD,
+    uploadPreset: CLOUDINARY_PRESET,
+    folder: 'lobos_cosmetic',
+    sources: ['local','camera','url'],
+    multiple: false,
+    maxFiles: 1
+  }, (error, result) => {
+    if(!error && result && result.event === 'success'){
+      uploadedImageUrl = result.info.secure_url;
+      document.getElementById('prodImagenPrincipal').value = uploadedImageUrl;
+      document.getElementById('uploadPreview').innerHTML = `<img src="${uploadedImageUrl}">`;
+    }
+  });
+  widget.open();
+}
+
+async function saveProduct(){
+  const id = document.getElementById('prodId').value;
+  const nombre = document.getElementById('prodNombre').value.trim();
+  const categoria = document.getElementById('prodCategoria').value;
+  const marca = document.getElementById('prodMarca').value.trim();
+  const precio = parseFloat(document.getElementById('prodPrecio').value);
+  const precioAnterior = document.getElementById('prodPrecioAnterior').value ? parseFloat(document.getElementById('prodPrecioAnterior').value) : null;
+  const descripcion = document.getElementById('prodDescripcion').value.trim();
+  const destacado = document.getElementById('prodDestacado').checked;
+  const stockMinimo = parseInt(document.getElementById('prodStockMinimo').value) || 5;
+
+  if(!nombre || !precio){
+    alert('Nombre y precio son obligatorios');
+    return;
+  }
+
+  const payload = {
+    nombre, categoria, marca, precio,
+    precio_anterior: precioAnterior,
+    descripcion,
+    imagen_principal: uploadedImageUrl,
+    destacado
+  };
+
+  if(id){
+    // Editar
+    await sb.from('lobos_productos').update(payload).eq('id', id);
+    await sb.from('lobos_inventario').update({stock_minimo: stockMinimo}).eq('producto_id', id);
+  } else {
+    // Crear
+    const { data: newProd, error } = await sb.from('lobos_productos').insert(payload).select().single();
+    if(error){ alert('Error al crear producto: ' + error.message); return; }
+
+    const stockInicial = parseInt(document.getElementById('prodStockInicial').value) || 0;
+    // el trigger ya creo el registro de inventario con stock 0, lo actualizamos
+    await sb.from('lobos_inventario').update({
+      stock_actual: stockInicial,
+      stock_minimo: stockMinimo
+    }).eq('producto_id', newProd.id);
+
+    if(stockInicial > 0){
+      await sb.from('lobos_movimientos').insert({
+        producto_id: newProd.id, tipo: 'entrada', cantidad: stockInicial,
+        motivo: 'Stock inicial', stock_resultante: stockInicial
+      });
+    }
+  }
+
+  closeProductModal();
+  await loadAllData();
+}
+
+/* ================= INVENTARIO TABLA ================= */
+function renderInventoryTable(){
+  const body = document.getElementById('inventoryBody');
+  if(inventario.length === 0){
+    body.innerHTML = `<tr><td colspan="5" class="empty-state">No hay inventario todavía</td></tr>`;
+    return;
+  }
+  body.innerHTML = inventario.map(inv => {
+    const p = productos.find(p => p.id === inv.producto_id);
+    if(!p) return '';
+    let tag = `<span class="tag tag-ok">Disponible</span>`;
+    if(inv.stock_actual <= 0) tag = `<span class="tag tag-danger">Agotado</span>`;
+    else if(inv.stock_actual <= inv.stock_minimo) tag = `<span class="tag tag-warn">Stock bajo</span>`;
+
+    return `<tr>
+      <td class="prod-name-cell"><img class="prod-thumb" src="${p.imagen_principal||'https://placehold.co/60/f6f6f6/999?text=LC'}">${p.nombre}</td>
+      <td class="stock-num">${inv.stock_actual}</td>
+      <td>${inv.stock_minimo}</td>
+      <td>${tag}</td>
+      <td class="actions-cell">
+        <div class="icon-action" onclick="openRestockModal('${p.id}','${p.nombre.replace(/'/g,"\\'")}')" title="Reabastecer">➕</div>
+        <div class="icon-action" onclick="openAdjustModal('${p.id}','${p.nombre.replace(/'/g,"\\'")}', ${inv.stock_minimo})" title="Ajustar mínimo">⚙️</div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+/* ================= REABASTECER ================= */
+function openRestockModal(prodId, prodName){
+  document.getElementById('restockProductId').value = prodId;
+  document.getElementById('restockProductName').textContent = prodName;
+  document.getElementById('restockCantidad').value = '';
+  document.getElementById('restockMotivo').value = 'Reabastecimiento';
+  document.getElementById('restockModalOverlay').classList.add('open');
+}
+function closeRestockModal(){
+  document.getElementById('restockModalOverlay').classList.remove('open');
+}
+async function confirmRestock(){
+  const prodId = document.getElementById('restockProductId').value;
+  const cantidad = parseInt(document.getElementById('restockCantidad').value);
+  const motivo = document.getElementById('restockMotivo').value.trim() || 'Reabastecimiento';
+
+  if(!cantidad || cantidad <= 0){
+    alert('Ingresa una cantidad válida');
+    return;
+  }
+
+  const { error } = await sb.rpc('lobos_reabastecer', {
+    p_producto_id: prodId, p_cantidad: cantidad, p_motivo: motivo
+  });
+
+  if(error){ alert('Error: ' + error.message); return; }
+
+  closeRestockModal();
+  await loadAllData();
+}
+
+/* ================= AJUSTAR STOCK MINIMO ================= */
+function openAdjustModal(prodId, prodName, currentMin){
+  document.getElementById('adjustProductId').value = prodId;
+  document.getElementById('adjustProductName').textContent = prodName;
+  document.getElementById('adjustStockMinimo').value = currentMin;
+  document.getElementById('adjustModalOverlay').classList.add('open');
+}
+function closeAdjustModal(){
+  document.getElementById('adjustModalOverlay').classList.remove('open');
+}
+async function confirmAdjust(){
+  const prodId = document.getElementById('adjustProductId').value;
+  const nuevoMin = parseInt(document.getElementById('adjustStockMinimo').value);
+  if(isNaN(nuevoMin) || nuevoMin < 0){ alert('Valor inválido'); return; }
+
+  await sb.from('lobos_inventario').update({stock_minimo: nuevoMin}).eq('producto_id', prodId);
+  closeAdjustModal();
+  await loadAllData();
+}
+
+/* ================= MOVIMIENTOS TABLA ================= */
+function renderMovementsTable(){
+  const body = document.getElementById('movementsBody');
+  if(movimientos.length === 0){
+    body.innerHTML = `<tr><td colspan="6" class="empty-state">No hay movimientos registrados</td></tr>`;
+    return;
+  }
+  const tipoLabels = {entrada:'Entrada', salida:'Salida', ajuste:'Ajuste', venta:'Venta'};
+  const tipoTags = {entrada:'tag-ok', salida:'tag-danger', ajuste:'tag-warn', venta:'tag-danger'};
+
+  body.innerHTML = movimientos.map(m => {
+    const p = productos.find(p => p.id === m.producto_id);
+    const fecha = new Date(m.creado_en).toLocaleString('es-CO', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+    return `<tr>
+      <td>${fecha}</td>
+      <td>${p ? p.nombre : '—'}</td>
+      <td><span class="tag ${tipoTags[m.tipo]||''}">${tipoLabels[m.tipo]||m.tipo}</span></td>
+      <td>${m.tipo === 'salida' || m.tipo === 'venta' ? '−' : '+'}${m.cantidad}</td>
+      <td>${m.motivo || '—'}</td>
+      <td>${m.stock_resultante}</td>
+    </tr>`;
+  }).join('');
+}
+</script>
+</body>
+</html>
