@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOBO'S COSMETIC</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --black:#0d0d0d;
+  --pink:#ff2f6e;
+  --pink-soft:#ffe3ec;
+  --pink-deep:#c8185a;
+  --white:#ffffff;
+  --gray:#6f6f6f;
+  --gray-light:#f4f4f4;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{
+  font-family:'Poppins',sans-serif;
+  background:var(--white);
+  color:var(--black);
+  overflow-x:hidden;
+}
+h1,h2,h3,.display{font-family:'Bebas Neue',sans-serif;letter-spacing:1px}
+a{text-decoration:none;color:inherit}
+img{display:block;max-width:100%}
+button{font-family:inherit;cursor:pointer;border:none}
+
+/* ===== HEADER ===== */
+header{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  background:rgba(13,13,13,0.95);
+  backdrop-filter:blur(10px);
+  padding:14px 24px;
+  display:flex;align-items:center;justify-content:space-between;
+  transition:.3s;
+}
+.logo{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:26px;color:var(--white);letter-spacing:3px;
+}
+.logo span{color:var(--pink)}
+nav.desktop-nav{display:flex;gap:32px}
+nav.desktop-nav a{color:var(--white);font-size:13px;font-weight:500;letter-spacing:1px;text-transform:uppercase;transition:.2s}
+nav.desktop-nav a:hover{color:var(--pink)}
+.header-icons{display:flex;align-items:center;gap:18px}
+.icon-btn{background:none;color:var(--white);font-size:20px;position:relative}
+.cart-count{
+  position:absolute;top:-6px;right:-8px;background:var(--pink);color:#fff;
+  font-size:10px;width:16px;height:16px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;font-weight:700;
+}
+.burger{display:none;background:none;color:#fff;font-size:22px}
+
+/* ===== HERO ===== */
+.hero{
+  position:relative;height:100vh;min-height:560px;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;background:var(--black);
+}
+.hero-slide{
+  position:absolute;inset:0;
+  background-size:cover;background-position:center;
+  opacity:0;transition:opacity 1.2s ease;
+}
+.hero-slide.active{opacity:1}
+.hero-slide::after{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(180deg, rgba(0,0,0,.35) 0%, rgba(0,0,0,.15) 40%, rgba(0,0,0,.6) 100%);
+}
+.hero-content{
+  position:relative;z-index:2;text-align:center;color:#fff;padding:0 20px;
+}
+.hero-content .eyebrow{
+  font-size:12px;letter-spacing:4px;text-transform:uppercase;color:var(--pink);margin-bottom:14px;font-weight:600;
+}
+.hero-content h1{
+  font-size:clamp(48px,9vw,110px);line-height:.95;margin-bottom:18px;
+}
+.hero-content p{font-size:15px;color:#eee;max-width:420px;margin:0 auto 28px;font-weight:300}
+.btn-hero{
+  background:var(--pink);color:#fff;padding:15px 38px;font-size:13px;
+  letter-spacing:2px;text-transform:uppercase;font-weight:600;border-radius:2px;
+  transition:.25s;display:inline-block;
+}
+.btn-hero:hover{background:var(--pink-deep);transform:translateY(-2px)}
+.hero-dots{position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:3}
+.hero-dots span{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.4);cursor:pointer;transition:.2s}
+.hero-dots span.active{background:var(--pink);width:24px;border-radius:4px}
+
+/* ===== SHOP BY CATEGORY ===== */
+.cat-section{padding:70px 24px;max-width:1300px;margin:0 auto}
+.section-head{text-align:center;margin-bottom:40px}
+.section-head .eyebrow{font-size:12px;letter-spacing:3px;color:var(--pink);text-transform:uppercase;font-weight:600}
+.section-head h2{font-size:42px;margin-top:6px}
+.cat-scroll{
+  display:flex;gap:22px;overflow-x:auto;padding:10px 4px 20px;scrollbar-width:none;
+}
+.cat-scroll::-webkit-scrollbar{display:none}
+.cat-item{flex:0 0 auto;text-align:center;cursor:pointer;width:130px}
+.cat-circle{
+  width:130px;height:130px;border-radius:50%;overflow:hidden;
+  border:3px solid transparent;transition:.3s;background:var(--gray-light);
+  display:flex;align-items:center;justify-content:center;margin-bottom:12px;
+}
+.cat-circle img{width:100%;height:100%;object-fit:cover}
+.cat-item:hover .cat-circle{border-color:var(--pink);transform:scale(1.04)}
+.cat-item span{font-size:12px;text-transform:uppercase;letter-spacing:1.5px;font-weight:600}
+
+/* ===== PROMO BLOCK ===== */
+.promo{
+  background:var(--black);color:#fff;padding:80px 24px;text-align:center;margin:40px 0;
+  position:relative;overflow:hidden;
+}
+.promo h2{font-size:clamp(32px,6vw,64px);margin-bottom:12px}
+.promo p{color:#ccc;font-weight:300;margin-bottom:26px}
+.promo .accent{color:var(--pink)}
+
+/* ===== PRODUCTS ===== */
+.products-section{padding:60px 24px;max-width:1300px;margin:0 auto}
+.filter-bar{
+  display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:40px;
+}
+.filter-chip{
+  padding:9px 20px;border:1.5px solid #ddd;border-radius:30px;font-size:12px;
+  text-transform:uppercase;letter-spacing:1px;font-weight:600;transition:.2s;background:#fff;
+}
+.filter-chip.active,.filter-chip:hover{background:var(--black);color:#fff;border-color:var(--black)}
+.grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:24px;
+}
+.card{cursor:pointer;position:relative}
+.card-img{
+  aspect-ratio:1/1.15;background:var(--gray-light);border-radius:6px;overflow:hidden;position:relative;
+}
+.card-img img{width:100%;height:100%;object-fit:cover;transition:.4s}
+.card:hover .card-img img{transform:scale(1.06)}
+.badge{
+  position:absolute;top:10px;left:10px;background:var(--pink);color:#fff;
+  font-size:10px;padding:5px 10px;border-radius:20px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;
+}
+.badge.agotado{background:#999}
+.card-info{padding:14px 4px}
+.card-cat{font-size:10px;color:var(--gray);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px}
+.card-name{font-size:14px;font-weight:600;margin-bottom:6px;line-height:1.3}
+.card-price{display:flex;gap:8px;align-items:center}
+.price-now{font-weight:700;font-size:15px}
+.price-old{font-size:12px;color:#aaa;text-decoration:line-through}
+.stock-low{font-size:10px;color:var(--pink-deep);font-weight:700;margin-top:4px;text-transform:uppercase}
+
+/* ===== MODAL PRODUCTO ===== */
+.overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:2000;
+  align-items:center;justify-content:center;padding:20px;
+}
+.overlay.open{display:flex}
+.modal{
+  background:#fff;max-width:920px;width:100%;max-height:88vh;overflow-y:auto;
+  border-radius:8px;display:grid;grid-template-columns:1fr 1fr;position:relative;
+}
+.modal-close{
+  position:absolute;top:16px;right:16px;background:rgba(0,0,0,.06);width:34px;height:34px;
+  border-radius:50%;font-size:18px;z-index:5;display:flex;align-items:center;justify-content:center;
+}
+.modal-img{background:var(--gray-light);position:relative}
+.modal-img img{width:100%;height:100%;object-fit:cover;min-height:340px}
+.modal-info{padding:36px}
+.modal-cat{font-size:11px;color:var(--pink);text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:8px}
+.modal-info h2{font-family:'Poppins';font-size:24px;font-weight:700;margin-bottom:10px;letter-spacing:0}
+.modal-price{font-size:22px;font-weight:700;margin-bottom:18px}
+.modal-price .old{font-size:14px;color:#aaa;text-decoration:line-through;font-weight:400;margin-left:8px}
+.modal-desc{font-size:13.5px;color:#555;line-height:1.7;margin-bottom:20px}
+.modal-stock{font-size:12px;font-weight:600;margin-bottom:20px;padding:8px 12px;border-radius:4px;display:inline-block}
+.modal-stock.ok{background:#e8f8ee;color:#1c8f4a}
+.modal-stock.low{background:#fff2e0;color:#c9770e}
+.modal-stock.out{background:#fdeaea;color:#c92e2e}
+.color-row{margin-bottom:20px}
+.color-row .label{font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--gray);font-weight:600;margin-bottom:10px}
+.color-swatches{display:flex;gap:10px;flex-wrap:wrap}
+.color-swatch{
+  width:36px;height:36px;border-radius:50%;cursor:pointer;border:2px solid transparent;
+  box-shadow:0 0 0 1px #ddd;transition:.2s;position:relative;
+}
+.color-swatch.selected{border-color:var(--black);box-shadow:0 0 0 2px #fff, 0 0 0 3px var(--black)}
+.color-swatch.agotado-swatch{opacity:.35;cursor:not-allowed}
+.color-name{font-size:12px;color:var(--gray);margin-top:8px}
+
+.qty-row{display:flex;align-items:center;gap:14px;margin-bottom:20px}
+.qty-btn{width:34px;height:34px;border:1.5px solid #ddd;background:#fff;border-radius:4px;font-size:16px}
+.qty-val{font-weight:700;font-size:15px;min-width:20px;text-align:center}
+.btn-add{
+  width:100%;background:var(--black);color:#fff;padding:16px;font-size:13px;
+  letter-spacing:2px;text-transform:uppercase;font-weight:700;border-radius:3px;transition:.2s;
+}
+.btn-add:hover{background:var(--pink)}
+.btn-add:disabled{background:#ccc;cursor:not-allowed}
+
+/* ===== CARRITO ===== */
+.cart-panel{
+  position:fixed;top:0;right:-420px;width:400px;max-width:100vw;height:100vh;background:#fff;
+  z-index:3000;transition:.35s;box-shadow:-4px 0 20px rgba(0,0,0,.15);display:flex;flex-direction:column;
+}
+.cart-panel.open{right:0}
+.cart-header{padding:22px 24px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center}
+.cart-header h3{font-family:'Poppins';font-weight:700;font-size:16px;text-transform:uppercase;letter-spacing:1px}
+.cart-items{flex:1;overflow-y:auto;padding:16px 24px}
+.cart-item{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid #f0f0f0}
+.cart-item img{width:64px;height:64px;object-fit:cover;border-radius:4px;background:var(--gray-light)}
+.cart-item-info{flex:1}
+.cart-item-info h4{font-size:13px;font-weight:600;margin-bottom:4px}
+.cart-item-info .cat{font-size:10px;color:#999;text-transform:uppercase;margin-bottom:6px}
+.cart-item-qty{display:flex;align-items:center;gap:8px}
+.cart-item-qty button{width:22px;height:22px;border:1px solid #ddd;background:#fff;border-radius:3px;font-size:12px}
+.cart-item-remove{font-size:11px;color:var(--pink-deep);margin-top:6px;font-weight:600}
+.cart-footer{padding:22px 24px;border-top:1px solid #eee}
+.cart-total{display:flex;justify-content:space-between;font-size:16px;font-weight:700;margin-bottom:16px}
+.btn-checkout{
+  width:100%;background:#25D366;color:#fff;padding:16px;font-size:13px;letter-spacing:1.5px;
+  text-transform:uppercase;font-weight:700;border-radius:3px;display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.empty-cart{text-align:center;padding:60px 20px;color:#999;font-size:13px}
+
+/* ===== FLOATING BUTTONS ===== */
+.float-wsp{
+  position:fixed;bottom:24px;right:24px;background:#25D366;color:#fff;width:56px;height:56px;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px;z-index:900;
+  box-shadow:0 4px 14px rgba(0,0,0,.25);
+}
+
+/* ===== FOOTER ===== */
+footer{background:var(--black);color:#ccc;padding:60px 24px 30px;margin-top:60px}
+.footer-inner{max-width:1300px;margin:0 auto;display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:40px}
+.footer-inner h4{color:#fff;font-size:13px;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:16px}
+.footer-inner p,.footer-inner a{font-size:13px;color:#999;line-height:2;display:block}
+.footer-inner a:hover{color:var(--pink)}
+.footer-bottom{max-width:1300px;margin:40px auto 0;padding-top:24px;border-top:1px solid #222;text-align:center;font-size:11px;color:#666}
+
+/* ===== ADMIN ACCESS (oculto) ===== */
+.admin-link{position:fixed;bottom:10px;left:10px;font-size:9px;color:#ddd;z-index:10;opacity:.4}
+
+/* ===== TOAST ===== */
+.toast{
+  position:fixed;bottom:100px;right:24px;background:var(--black);color:#fff;padding:14px 22px;
+  border-radius:6px;font-size:13px;z-index:5000;transform:translateY(20px);opacity:0;transition:.3s;
+}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:860px){
+  nav.desktop-nav{display:none}
+  .burger{display:block}
+  .modal{grid-template-columns:1fr}
+  .modal-img img{min-height:280px}
+  .footer-inner{grid-template-columns:1fr 1fr;gap:30px}
+  .cart-panel{width:100%}
+}
+@media(max-width:480px){
+  .cat-circle{width:100px;height:100px}
+  .cat-item{width:100px}
+  .section-head h2{font-size:32px}
+}
+
+/* mobile nav drawer */
+.mobile-nav{
+  position:fixed;top:0;left:-100%;width:80%;max-width:320px;height:100vh;background:#fff;z-index:2500;
+  transition:.3s;padding:80px 30px;
+}
+.mobile-nav.open{left:0}
+.mobile-nav a{display:block;padding:14px 0;font-size:15px;font-weight:600;text-transform:uppercase;letter-spacing:1px;border-bottom:1px solid #eee}
+.mobile-nav-close{position:absolute;top:24px;right:24px;font-size:24px;background:none}
+.mobile-nav-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:2400}
+.mobile-nav-overlay.open{display:block}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <button class="burger" onclick="toggleMobileNav(true)">☰</button>
+  <div class="logo">LOBO'S <span>COSMETIC</span></div>
+  <nav class="desktop-nav">
+    <a href="#" onclick="filterByCat('todos');return false;">Todo</a>
+    <a href="#" onclick="filterByCat('rostro');return false;">Rostro</a>
+    <a href="#" onclick="filterByCat('ojos');return false;">Ojos</a>
+    <a href="#" onclick="filterByCat('cejas');return false;">Cejas</a>
+    <a href="#" onclick="filterByCat('skincare');return false;">Skincare</a>
+    <a href="#" onclick="filterByCat('cuidado_capilar');return false;">Cabello</a>
+  </nav>
+  <div class="header-icons">
+    <a href="admin.html" class="icon-btn" title="Administrador" style="text-decoration:none">🔒</a>
+    <button class="icon-btn" onclick="toggleCart(true)">🛍
+      <span class="cart-count" id="cartCount" style="display:none">0</span>
+    </button>
+  </div>
+</header>
+
+<div class="mobile-nav-overlay" id="mobileOverlay" onclick="toggleMobileNav(false)"></div>
+<div class="mobile-nav" id="mobileNav">
+  <button class="mobile-nav-close" onclick="toggleMobileNav(false)">✕</button>
+  <a href="#" onclick="filterByCat('todos');toggleMobileNav(false);return false;">Todo</a>
+  <a href="#" onclick="filterByCat('rostro');toggleMobileNav(false);return false;">Rostro</a>
+  <a href="#" onclick="filterByCat('ojos');toggleMobileNav(false);return false;">Ojos</a>
+  <a href="#" onclick="filterByCat('cejas');toggleMobileNav(false);return false;">Cejas</a>
+  <a href="#" onclick="filterByCat('skincare');toggleMobileNav(false);return false;">Skincare</a>
+  <a href="#" onclick="filterByCat('cuidado_capilar');toggleMobileNav(false);return false;">Cuidado Capilar</a>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-content">
+    <div class="eyebrow">Nueva Colección</div>
+    <h1>LOBO'S<br>COSMETIC</h1>
+    <p>Belleza con actitud. Productos para rostro, ojos, piel y cabello hechos para resaltar tu esencia.</p>
+    <a href="#productos" class="btn-hero">Comprar ahora</a>
+  </div>
+  <div class="hero-dots" id="heroDots"></div>
+</section>
+
+<!-- CATEGORIAS -->
+<section class="cat-section">
+  <div class="section-head">
+    <div class="eyebrow">Explora</div>
+    <h2>Compra por categoría</h2>
+  </div>
+  <div class="cat-scroll" id="catScroll"></div>
+</section>
+
+<!-- PROMO -->
+<section class="promo">
+  <h2>Tu belleza, <span class="accent">tu regla</span></h2>
+  <p>Envíos a todo el país · Calidad garantizada</p>
+  <a href="#productos" class="btn-hero">Ver catálogo</a>
+</section>
+
+<!-- PRODUCTOS -->
+<section class="products-section" id="productos">
+  <div class="section-head">
+    <div class="eyebrow">Catálogo</div>
+    <h2>Todos los productos</h2>
+  </div>
+  <div class="filter-bar" id="filterBar"></div>
+  <div class="grid" id="grid"></div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="logo" style="margin-bottom:14px">LOBO'S <span>COSMETIC</span></div>
+      <p>Cosmética y cuidado personal con actitud propia.</p>
+    </div>
+    <div>
+      <h4>Categorías</h4>
+      <a href="#" onclick="filterByCat('rostro');return false;">Rostro</a>
+      <a href="#" onclick="filterByCat('ojos');return false;">Ojos</a>
+      <a href="#" onclick="filterByCat('skincare');return false;">Skincare</a>
+    </div>
+    <div>
+      <h4>Ayuda</h4>
+      <a href="#" id="footerWsp">WhatsApp</a>
+      <a href="#">Envíos</a>
+      <a href="#">Cambios y devoluciones</a>
+    </div>
+    <div>
+      <h4>Síguenos</h4>
+      <a href="#">Instagram</a>
+      <a href="#">TikTok</a>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2026 LOBO'S COSMETIC. Todos los derechos reservados.</div>
+</footer>
+
+<!-- MODAL PRODUCTO -->
+<div class="overlay" id="productOverlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeProductModal()">✕</button>
+    <div class="modal-img"><img id="modalImg" src="" alt=""></div>
+    <div class="modal-info">
+      <div class="modal-cat" id="modalCat"></div>
+      <h2 id="modalName"></h2>
+      <div class="modal-price" id="modalPrice"></div>
+      <div class="modal-stock" id="modalStock"></div>
+      <p class="modal-desc" id="modalDesc"></p>
+      <div class="color-row" id="colorRow" style="display:none">
+        <div class="label">Color</div>
+        <div class="color-swatches" id="colorSwatches"></div>
+        <div class="color-name" id="selectedColorName"></div>
+      </div>
+      <div class="qty-row">
+        <button class="qty-btn" onclick="changeQty(-1)">−</button>
+        <span class="qty-val" id="qtyVal">1</span>
+        <button class="qty-btn" onclick="changeQty(1)">+</button>
+      </div>
+      <button class="btn-add" id="btnAdd" onclick="addToCart()">Agregar al carrito</button>
+    </div>
+  </div>
+</div>
+
+<!-- CARRITO -->
+<div class="overlay" id="cartOverlay" onclick="if(event.target===this)toggleCart(false)" style="background:rgba(0,0,0,.4)"></div>
+<div class="cart-panel" id="cartPanel">
+  <div class="cart-header">
+    <h3>Tu carrito</h3>
+    <button onclick="toggleCart(false)" style="background:none;font-size:20px">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems"></div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-total"><span>Total</span><span id="cartTotal">$0</span></div>
+    <button class="btn-checkout" onclick="checkoutWhatsapp()">📱 Pedir por WhatsApp</button>
+  </div>
+</div>
+
+<a href="#" class="float-wsp" id="floatWsp" target="_blank">💬</a>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ================= CONFIG ================= */
+const SUPABASE_URL = "https://pshgxyibdxoyttrkpmzr.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBzaGd4eWliZHhveXR0cmtwbXpyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM1NDY5MzUsImV4cCI6MjA5OTEyMjkzNX0.z2xysCO345ykSwXQMeIlb0IcOrohmjZqnhraiGSg_C8";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const WHATSAPP_NUMBER = "573000000000"; // <-- CAMBIA ESTO por tu número con indicativo de país, sin +
+
+const CATEGORIAS = [
+  {slug:'rostro', label:'Rostro', img:'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=300'},
+  {slug:'ojos', label:'Ojos', img:'https://images.unsplash.com/photo-1512207736890-6ffed4370bf5?w=300'},
+  {slug:'cejas', label:'Cejas', img:'https://images.unsplash.com/photo-1519699047748-de8e457a634e?w=300'},
+  {slug:'skincare', label:'Skincare', img:'https://images.unsplash.com/photo-1556228720-195a672e8a03?w=300'},
+  {slug:'cuidado_capilar', label:'Cabello', img:'https://images.unsplash.com/photo-1522336572468-97b06e8ef143?w=300'},
+];
+
+let productos = [];
+let inventarioMap = {};
+let variantesMap = {}; // producto_id -> [variantes]
+let inventarioVarianteMap = {}; // variante_id -> inventario
+let currentFilter = 'todos';
+let cart = JSON.parse(localStorage.getItem('lobos_cart') || '[]');
+let currentProduct = null;
+let currentQty = 1;
+let selectedVariant = null;
+
+/* ================= INIT ================= */
+document.addEventListener('DOMContentLoaded', () => {
+  renderCategories();
+  renderHeroDots(3);
+  startHeroRotation();
+  loadProducts();
+  updateCartUI();
+  document.getElementById('floatWsp').href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola! Quiero información sobre sus productos ✨')}`;
+  document.getElementById('footerWsp').href = document.getElementById('floatWsp').href;
+});
+
+/* ================= HERO ================= */
+const heroImgs = [
+  'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=1600',
+  'https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=1600',
+  'https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=1600'
+];
+let heroIndex = 0;
+function renderHeroDots(n){
+  const hero = document.getElementById('hero');
+  heroImgs.forEach((src,i)=>{
+    const div = document.createElement('div');
+    div.className = 'hero-slide' + (i===0?' active':'');
+    div.style.backgroundImage = `url(${src})`;
+    hero.insertBefore(div, hero.firstChild);
+  });
+  const dots = document.getElementById('heroDots');
+  heroImgs.forEach((_,i)=>{
+    const d = document.createElement('span');
+    if(i===0) d.className='active';
+    d.onclick = ()=>goToSlide(i);
+    dots.appendChild(d);
+  });
+}
+function goToSlide(i){
+  document.querySelectorAll('.hero-slide').forEach((s,idx)=>s.classList.toggle('active', idx===i));
+  document.querySelectorAll('.hero-dots span').forEach((d,idx)=>d.classList.toggle('active', idx===i));
+  heroIndex = i;
+}
+function startHeroRotation(){
+  setInterval(()=>{
+    heroIndex = (heroIndex+1) % heroImgs.length;
+    goToSlide(heroIndex);
+  }, 4500);
+}
+
+/* ================= CATEGORIAS ================= */
+function renderCategories(){
+  const cont = document.getElementById('catScroll');
+  cont.innerHTML = CATEGORIAS.map(c => `
+    <div class="cat-item" onclick="filterByCat('${c.slug}')">
+      <div class="cat-circle"><img src="${c.img}" alt="${c.label}"></div>
+      <span>${c.label}</span>
+    </div>
+  `).join('');
+
+  const filterBar = document.getElementById('filterBar');
+  filterBar.innerHTML = `<div class="filter-chip active" data-cat="todos" onclick="filterByCat('todos')">Todos</div>` +
+    CATEGORIAS.map(c => `<div class="filter-chip" data-cat="${c.slug}" onclick="filterByCat('${c.slug}')">${c.label}</div>`).join('');
+}
+
+function filterByCat(cat){
+  currentFilter = cat;
+  document.querySelectorAll('.filter-chip').forEach(chip=>{
+    chip.classList.toggle('active', chip.dataset.cat === cat);
+  });
+  renderProducts();
+  document.getElementById('productos').scrollIntoView({behavior:'smooth'});
+}
+
+/* ================= PRODUCTOS ================= */
+async function loadProducts(){
+  const { data: prods, error } = await sb
+    .from('lobos_productos')
+    .select('*')
+    .eq('activo', true)
+    .order('creado_en', {ascending:false});
+
+  if(error){ console.error(error); return; }
+  productos = prods || [];
+
+  const { data: inv } = await sb.from('lobos_inventario').select('*');
+  (inv||[]).forEach(i => inventarioMap[i.producto_id] = i);
+
+  const { data: vars } = await sb.from('lobos_variantes').select('*').eq('activo', true).order('orden', {ascending:true});
+  (vars||[]).forEach(v => {
+    if(!variantesMap[v.producto_id]) variantesMap[v.producto_id] = [];
+    variantesMap[v.producto_id].push(v);
+  });
+
+  const { data: invVar } = await sb.from('lobos_inventario_variante').select('*');
+  (invVar||[]).forEach(i => inventarioVarianteMap[i.variante_id] = i);
+
+  renderProducts();
+}
+
+function renderProducts(){
+  const grid = document.getElementById('grid');
+  const filtered = currentFilter === 'todos' ? productos : productos.filter(p => p.categoria === currentFilter);
+
+  if(filtered.length === 0){
+    grid.innerHTML = `<p style="grid-column:1/-1;text-align:center;color:#999;padding:40px 0">No hay productos en esta categoría todavía.</p>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(p => {
+    const inv = inventarioMap[p.id];
+    const stock = inv ? inv.stock_actual : 0;
+    const lowStock = inv && stock > 0 && stock <= inv.stock_minimo;
+    const outOfStock = stock <= 0;
+    return `
+    <div class="card" onclick="openProductModal('${p.id}')">
+      <div class="card-img">
+        <img src="${p.imagen_principal || 'https://placehold.co/400x460/f4f4f4/999?text=LOBO%27S'}" alt="${p.nombre}">
+        ${outOfStock ? '<span class="badge agotado">Agotado</span>' : (p.destacado ? '<span class="badge">Destacado</span>' : '')}
+      </div>
+      <div class="card-info">
+        <div class="card-cat">${catLabel(p.categoria)}</div>
+        <div class="card-name">${p.nombre}</div>
+        <div class="card-price">
+          <span class="price-now">$${Number(p.precio).toLocaleString('es-CO')}</span>
+          ${p.precio_anterior ? `<span class="price-old">$${Number(p.precio_anterior).toLocaleString('es-CO')}</span>` : ''}
+        </div>
+        ${lowStock ? `<div class="stock-low">¡Últimas ${stock} unidades!</div>` : ''}
+        ${(variantesMap[p.id]||[]).length > 0 ? `<div style="display:flex;gap:4px;margin-top:6px">${(variantesMap[p.id]||[]).map(v=>`<span style="width:12px;height:12px;border-radius:50%;background:${v.color_hex||'#ccc'};box-shadow:0 0 0 1px #ddd"></span>`).join('')}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function catLabel(slug){
+  const c = CATEGORIAS.find(c => c.slug === slug);
+  return c ? c.label : slug;
+}
+
+/* ================= MODAL PRODUCTO ================= */
+function openProductModal(id){
+  const p = productos.find(p => p.id === id);
+  if(!p) return;
+  currentProduct = p;
+  currentQty = 1;
+  selectedVariant = null;
+  document.getElementById('qtyVal').textContent = 1;
+
+  document.getElementById('modalCat').textContent = catLabel(p.categoria);
+  document.getElementById('modalName').textContent = p.nombre;
+  document.getElementById('modalDesc').textContent = p.descripcion || '';
+
+  const colorRow = document.getElementById('colorRow');
+  const swatchesCont = document.getElementById('colorSwatches');
+  const prodVariants = variantesMap[p.id] || [];
+
+  if(prodVariants.length > 0){
+    colorRow.style.display = 'block';
+    swatchesCont.innerHTML = prodVariants.map(v => {
+      const vInv = inventarioVarianteMap[v.id];
+      const vStock = vInv ? vInv.stock_actual : 0;
+      return `<div class="color-swatch ${vStock<=0?'agotado-swatch':''}" style="background:${v.color_hex||'#ccc'}" data-vid="${v.id}" onclick="${vStock<=0?'':`selectVariant('${v.id}')`}" title="${v.color_nombre}"></div>`;
+    }).join('');
+    // seleccionar automáticamente el primer color disponible
+    const firstAvailable = prodVariants.find(v => {
+      const vInv = inventarioVarianteMap[v.id];
+      return vInv && vInv.stock_actual > 0;
+    });
+    if(firstAvailable) selectVariant(firstAvailable.id);
+    else updateModalDisplay(); // todos agotados
+  } else {
+    colorRow.style.display = 'none';
+    updateModalDisplay();
+  }
+
+  document.getElementById('productOverlay').classList.add('open');
+}
+
+function selectVariant(variantId){
+  selectedVariant = (variantesMap[currentProduct.id] || []).find(v => v.id === variantId);
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.toggle('selected', s.dataset.vid === variantId));
+  document.getElementById('selectedColorName').textContent = selectedVariant ? selectedVariant.color_nombre : '';
+  currentQty = 1;
+  document.getElementById('qtyVal').textContent = 1;
+  updateModalDisplay();
+}
+
+function updateModalDisplay(){
+  const p = currentProduct;
+  const img = selectedVariant && selectedVariant.imagen ? selectedVariant.imagen : (p.imagen_principal || 'https://placehold.co/600x600/f4f4f4/999?text=LOBO%27S');
+  document.getElementById('modalImg').src = img;
+
+  const precio = selectedVariant && selectedVariant.precio_override ? selectedVariant.precio_override : p.precio;
+  document.getElementById('modalPrice').innerHTML = `$${Number(precio).toLocaleString('es-CO')}` +
+    (!selectedVariant && p.precio_anterior ? `<span class="old">$${Number(p.precio_anterior).toLocaleString('es-CO')}</span>` : '');
+
+  let stock, minimo;
+  if(selectedVariant){
+    const vInv = inventarioVarianteMap[selectedVariant.id];
+    stock = vInv ? vInv.stock_actual : 0;
+    minimo = vInv ? vInv.stock_minimo : 5;
+  } else {
+    const inv = inventarioMap[p.id];
+    stock = inv ? inv.stock_actual : 0;
+    minimo = inv ? inv.stock_minimo : 5;
+  }
+
+  const stockEl = document.getElementById('modalStock');
+  const btnAdd = document.getElementById('btnAdd');
+
+  if(stock <= 0){
+    stockEl.className = 'modal-stock out';
+    stockEl.textContent = 'Agotado';
+    btnAdd.disabled = true;
+    btnAdd.textContent = 'Sin stock';
+  } else if(stock <= minimo){
+    stockEl.className = 'modal-stock low';
+    stockEl.textContent = `¡Solo quedan ${stock} unidades!`;
+    btnAdd.disabled = false;
+    btnAdd.textContent = 'Agregar al carrito';
+  } else {
+    stockEl.className = 'modal-stock ok';
+    stockEl.textContent = 'Disponible';
+    btnAdd.disabled = false;
+    btnAdd.textContent = 'Agregar al carrito';
+  }
+}
+function closeProductModal(){
+  document.getElementById('productOverlay').classList.remove('open');
+}
+function changeQty(delta){
+  let maxStock;
+  if(selectedVariant){
+    const vInv = inventarioVarianteMap[selectedVariant.id];
+    maxStock = vInv ? vInv.stock_actual : 0;
+  } else {
+    const inv = inventarioMap[currentProduct.id];
+    maxStock = inv ? inv.stock_actual : 0;
+  }
+  currentQty = Math.min(maxStock, Math.max(1, currentQty + delta));
+  document.getElementById('qtyVal').textContent = currentQty;
+}
+
+/* ================= CARRITO ================= */
+function addToCart(){
+  if(!currentProduct) return;
+
+  // el "lineId" identifica producto + color, para que cada color sea una línea distinta en el carrito
+  const lineId = selectedVariant ? `${currentProduct.id}__${selectedVariant.id}` : currentProduct.id;
+  const existing = cart.find(i => i.lineId === lineId);
+
+  let maxStock;
+  if(selectedVariant){
+    const vInv = inventarioVarianteMap[selectedVariant.id];
+    maxStock = vInv ? vInv.stock_actual : 0;
+  } else {
+    const inv = inventarioMap[currentProduct.id];
+    maxStock = inv ? inv.stock_actual : 0;
+  }
+
+  const precio = selectedVariant && selectedVariant.precio_override ? selectedVariant.precio_override : currentProduct.precio;
+  const imagen = selectedVariant && selectedVariant.imagen ? selectedVariant.imagen : currentProduct.imagen_principal;
+
+  if(existing){
+    existing.qty = Math.min(maxStock, existing.qty + currentQty);
+  } else {
+    cart.push({
+      lineId,
+      id: currentProduct.id,
+      varianteId: selectedVariant ? selectedVariant.id : null,
+      colorNombre: selectedVariant ? selectedVariant.color_nombre : null,
+      nombre: currentProduct.nombre,
+      precio: precio,
+      imagen: imagen,
+      categoria: currentProduct.categoria,
+      qty: currentQty
+    });
+  }
+  saveCart();
+  showToast('Producto agregado al carrito ✨');
+  closeProductModal();
+  toggleCart(true);
+}
+
+function saveCart(){
+  localStorage.setItem('lobos_cart', JSON.stringify(cart));
+  updateCartUI();
+}
+
+function updateCartUI(){
+  const count = cart.reduce((sum,i)=>sum+i.qty, 0);
+  const countEl = document.getElementById('cartCount');
+  countEl.textContent = count;
+  countEl.style.display = count > 0 ? 'flex' : 'none';
+
+  const itemsEl = document.getElementById('cartItems');
+  const footerEl = document.getElementById('cartFooter');
+
+  if(cart.length === 0){
+    itemsEl.innerHTML = `<div class="empty-cart">Tu carrito está vacío</div>`;
+    footerEl.style.display = 'none';
+    return;
+  }
+
+  itemsEl.innerHTML = cart.map((item, idx) => `
+    <div class="cart-item">
+      <img src="${item.imagen || 'https://placehold.co/100/f4f4f4/999?text=LC'}" alt="">
+      <div class="cart-item-info">
+        <h4>${item.nombre}</h4>
+        <div class="cat">${catLabel(item.categoria)}${item.colorNombre ? ' · ' + item.colorNombre : ''}</div>
+        <div class="cart-item-qty">
+          <button onclick="updateCartQty(${idx},-1)">−</button>
+          <span>${item.qty}</span>
+          <button onclick="updateCartQty(${idx},1)">+</button>
+          <span style="margin-left:8px;font-weight:700;font-size:13px">$${(item.precio*item.qty).toLocaleString('es-CO')}</span>
+        </div>
+        <div class="cart-item-remove" onclick="removeFromCart(${idx})">Eliminar</div>
+      </div>
+    </div>
+  `).join('');
+
+  const total = cart.reduce((sum,i)=>sum + i.precio*i.qty, 0);
+  document.getElementById('cartTotal').textContent = `$${total.toLocaleString('es-CO')}`;
+  footerEl.style.display = 'block';
+}
+
+function updateCartQty(idx, delta){
+  const item = cart[idx];
+  let maxStock;
+  if(item.varianteId){
+    const vInv = inventarioVarianteMap[item.varianteId];
+    maxStock = vInv ? vInv.stock_actual : 999;
+  } else {
+    const inv = inventarioMap[item.id];
+    maxStock = inv ? inv.stock_actual : 999;
+  }
+  item.qty = Math.min(maxStock, Math.max(1, item.qty + delta));
+  saveCart();
+}
+function removeFromCart(idx){
+  cart.splice(idx,1);
+  saveCart();
+}
+function toggleCart(open){
+  document.getElementById('cartPanel').classList.toggle('open', open);
+  document.getElementById('cartOverlay').classList.toggle('open', open);
+}
+
+function checkoutWhatsapp(){
+  if(cart.length === 0) return;
+  let msg = `¡Hola! Quiero hacer este pedido en LOBO'S COSMETIC:\n\n`;
+  cart.forEach(i => {
+    msg += `• ${i.nombre}${i.colorNombre ? ' (' + i.colorNombre + ')' : ''} x${i.qty} - $${(i.precio*i.qty).toLocaleString('es-CO')}\n`;
+  });
+  const total = cart.reduce((sum,i)=>sum + i.precio*i.qty, 0);
+  msg += `\nTotal: $${total.toLocaleString('es-CO')}`;
+  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+/* ================= MOBILE NAV ================= */
+function toggleMobileNav(open){
+  document.getElementById('mobileNav').classList.toggle('open', open);
+  document.getElementById('mobileOverlay').classList.toggle('open', open);
+}
+
+/* ================= TOAST ================= */
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
